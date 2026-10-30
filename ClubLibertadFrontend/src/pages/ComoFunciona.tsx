@@ -10,6 +10,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import { authService } from "../services/api";
 
 const PASOS = [
   {
@@ -67,6 +68,10 @@ const FAQ = [
 ];
 
 export default function ComoFunciona() {
+  const autenticado = Boolean(authService.obtenerToken());
+  const esAdmin = (authService.obtenerRol() || "").toUpperCase().includes("ADMIN");
+  const panelUrl = esAdmin ? "/admin" : "/panel";
+
   return (
     <main>
       <section className="ep-section">
@@ -82,9 +87,15 @@ export default function ComoFunciona() {
                 para competir, llevar tu credencial y construir tu trayectoria.
               </p>
             </div>
-            <Link className="btn" to="/registro">
-              Crear mi cuenta
-            </Link>
+            {autenticado ? (
+              <Link className="btn" to={panelUrl}>
+                {esAdmin ? "Ir al panel admin" : "Ir a mi panel"}
+              </Link>
+            ) : (
+              <Link className="btn" to="/registro">
+                Crear mi cuenta
+              </Link>
+            )}
           </div>
 
           <div className="steps">
@@ -196,8 +207,14 @@ export default function ComoFunciona() {
             Crea tu cuenta, encuentra a tu pareja y empieza a construir tu trayectoria.
           </p>
           <div className="cta">
-            <Link className="btn" to="/registro">Crear mi cuenta</Link>
-            <Link className="btn ghost" to="/concursos">Ver concursos</Link>
+            {autenticado ? (
+              <Link className="btn" to="/concursos">Ver concursos abiertos</Link>
+            ) : (
+              <>
+                <Link className="btn" to="/registro">Crear mi cuenta</Link>
+                <Link className="btn ghost" to="/concursos">Ver concursos</Link>
+              </>
+            )}
           </div>
         </div>
       </section>

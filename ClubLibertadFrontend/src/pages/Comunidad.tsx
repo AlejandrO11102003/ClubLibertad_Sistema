@@ -12,6 +12,7 @@ import {
 import {
   BailarinDestacado,
   bailarinesService,
+  authService,
 } from "../services/api";
 
 const DEMO: BailarinDestacado[] = [
@@ -90,6 +91,7 @@ function Estrellas({ nivel }: { nivel?: number }) {
 export default function Comunidad() {
   const [bailarines, setBailarines] = useState<BailarinDestacado[]>([]);
   const [cargando, setCargando] = useState(true);
+  const autenticado = Boolean(authService.obtenerToken());
 
   useEffect(() => {
     let activo = true;
@@ -128,9 +130,15 @@ export default function Comunidad() {
                 público y conecta con personas que comparten tu pasión por la marinera.
               </p>
             </div>
-            <Link className="btn" to="/registro">
-              Unirme a la comunidad
-            </Link>
+            {autenticado ? (
+              <Link className="btn" to="/concursos">
+                Ver concursos abiertos
+              </Link>
+            ) : (
+              <Link className="btn" to="/registro">
+                Unirme a la comunidad
+              </Link>
+            )}
           </div>
 
           <div className="stats" style={{ maxWidth: 620, margin: 0 }}>

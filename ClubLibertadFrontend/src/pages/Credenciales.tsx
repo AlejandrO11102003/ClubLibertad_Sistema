@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, IdCard } from "lucide-react";
+import { ArrowLeft, Eye, IdCard } from "lucide-react";
 import { Credencial, credencialesService } from "../services/api";
+import CredencialModal from "../components/credencial/CredencialModal";
 
 const formatearFecha = (fecha?: string) => {
   if (!fecha) return "—";
@@ -16,6 +17,7 @@ export default function Credenciales() {
   const [credenciales, setCredenciales] = useState<Credencial[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [seleccionada, setSeleccionada] = useState<Credencial | null>(null);
 
   useEffect(() => {
     let activo = true;
@@ -133,12 +135,13 @@ export default function Credenciales() {
                       {credencial.completa ? "Completa" : "Falta foto"}
                     </span>
 
-                    <Link
-                      to={`/credencial/${credencial.inscripcionId}`}
-                      className="text-xs font-semibold text-primary no-underline hover:underline"
+                    <button
+                      type="button"
+                      onClick={() => setSeleccionada(credencial)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-primary transition hover:underline"
                     >
-                      Ver credencial →
-                    </Link>
+                      <Eye size={14} /> Ver credencial
+                    </button>
                   </div>
                 </div>
               </article>
@@ -146,6 +149,13 @@ export default function Credenciales() {
           </div>
         )}
       </main>
+
+      {seleccionada && (
+        <CredencialModal
+          credencial={seleccionada}
+          onClose={() => setSeleccionada(null)}
+        />
+      )}
     </div>
   );
 }
