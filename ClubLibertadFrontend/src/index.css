@@ -1,0 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&display=swap");
+ 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ep-primary: 163 21 46;
+  --ep-primary-hover: 126 16 35;
+  --ep-accent: 201 143 31;
+  --ep-main: 242 244 249;
+  --ep-surface: 255 255 255;
+  --ep-ink: 16 27 58;
+  --ep-muted: 85 96 122;
+  --ep-line: 221 226 238;
+  --ep-success: 24 121 78;
+  --ep-danger: 180 35 24;
+  --ep-soft: 242 244 249;
+  --ep-sand: 230 234 243;
+  --ep-blush: 251 233 236;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --ep-primary: 224 85 108;
+  --ep-primary-hover: 240 105 127;
+  --ep-accent: 227 176 75;
+  --ep-main: 11 18 38;
+  --ep-surface: 22 32 61;
+  --ep-ink: 241 243 250;
+  --ep-muted: 165 175 200;
+  --ep-line: 38 49 79;
+  --ep-success: 76 195 138;
+  --ep-danger: 240 105 127;
+  --ep-soft: 18 27 54;
+  --ep-sand: 29 40 72;
+  --ep-blush: 58 26 38;
+  color-scheme: dark;
+}
+ 
+@layer base {
+  body {
+    @apply bg-main font-sans text-ink;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+}

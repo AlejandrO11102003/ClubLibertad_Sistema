@@ -1,0 +1,48 @@
+# ------------------------- Entorno / secretos -------------------------
+# Nunca subir variables de entorno reales (solo los .env.example)
+.env
+.env.*
+!.env.example
+
+# Certificados y llaves
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# ------------------------- Archivos generados -------------------------
+# Backend (Maven)
+ClubLibertadBackend/target/
+ClubLibertadBackend/uploads/
+*.log
+
+# Frontend (Node / React)
+ClubLibertadFrontend/node_modules/
+ClubLibertadFrontend/build/
+ClubLibertadFrontend/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ------------------------- Sistema / editores -------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+.sts4-cache
+.apt_generated
+
+# ------------------------- Local -------------------------
+*.local

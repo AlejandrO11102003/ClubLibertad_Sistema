@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: entre_panuelos_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: entre_panuelos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: America/Lima
+    ports:
+      # 5433 en el host para no chocar con el PostgreSQL local (5432)
+      - "5433:5432"
+    volumes:
+      - entre_panuelos_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d entre_panuelos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  entre_panuelos_pgdata:
+    name: entre_panuelos_pgdata
