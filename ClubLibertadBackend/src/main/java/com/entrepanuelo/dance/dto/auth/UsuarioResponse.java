@@ -4,6 +4,7 @@ package com.entrepanuelo.dance.dto.auth;
 import com.entrepanuelo.dance.entity.Perfil;
 import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import lombok.*;
 
 @Getter
@@ -15,6 +16,7 @@ public class UsuarioResponse {
 
     private Long id;
     private String dni;          // ← enmascarado (****1234)
+    private TipoDocumento tipoDocumento;
     private Integer anioNacimiento;
     private Rol rol;
 
@@ -40,6 +42,7 @@ public class UsuarioResponse {
         UsuarioResponseBuilder b = UsuarioResponse.builder()
                 .id(u.getId())
                 .dni(dniMask)
+                .tipoDocumento(u.getTipoDocumento())
                 .anioNacimiento(u.getAnioNacimiento())
                 .rol(u.getRol());
 

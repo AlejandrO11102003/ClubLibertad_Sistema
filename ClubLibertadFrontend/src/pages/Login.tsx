@@ -10,11 +10,12 @@ import {
   LogIn,
   Sparkles,
 } from "lucide-react";
-import { authService } from "../services/api";
+import { authService, TipoDocumento } from "../services/api";
 
 type Alerta = { tipo: "error" | "exito"; texto: string } | null;
 
-const validarDni = (v: string) => /^\d{8}$/.test(v);
+const validarDocumento = (tipo: TipoDocumento, v: string) =>
+  tipo === "DNI" ? /^\d{8}$/.test(v) : /^[A-Za-z0-9]{6,20}$/.test(v);
 
 const inputBase =
   "w-full rounded-btn border-[1.5px] bg-cream py-[13px] pl-11 pr-11 text-sm text-ink outline-none transition placeholder:text-[#A8A199] focus:bg-white focus:shadow-[0_0_0_3px_rgba(155,27,48,0.10)]";
@@ -23,6 +24,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [dni, setDni] = useState("");
+  const [tipoDocumento, setTipoDocumento] = useState<TipoDocumento>("DNI");
   const [password, setPassword] = useState("");
   const [verPassword, setVerPassword] = useState(false);
   const [recordarme, setRecordarme] = useState(false);
@@ -32,7 +34,10 @@ export default function Login() {
   const [alerta, setAlerta] = useState<Alerta>(null);
 
   const onChangeDni = (e: ChangeEvent<HTMLInputElement>) => {
-    setDni(e.target.value.replace(/\D/g, "").slice(0, 8));
+    const value = tipoDocumento === "DNI"
+      ? e.target.value.replace(/\D/g, "").slice(0, 8)
+      : e.target.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 20).toUpperCase();
+    setDni(value);
     setErrorDni(false);
     setAlerta(null);
   };
@@ -43,14 +48,15 @@ export default function Login() {
     setAlerta(null);
   };
 
-  const onBlurDni = () => setErrorDni(dni.trim() !== "" && !validarDni(dni.trim()));
+  const onBlurDni = () =>
+    setErrorDni(dni.trim() !== "" && !validarDocumento(tipoDocumento, dni.trim()));
   const onBlurPassword = () => setErrorPassword(password !== "" && password.length < 6);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const dniLimpio = dni.trim();
 
-    const dniMal = !validarDni(dniLimpio);
+    const dniMal = !validarDocumento(tipoDocumento, dniLimpio);
     const passMal = password.length < 6;
     setErrorDni(dniMal);
     setErrorPassword(passMal);
@@ -64,7 +70,11 @@ export default function Login() {
     setAlerta(null);
 
     try {
-      const data = await authService.login({ dni: dniLimpio, password });
+      const data = await authService.login({
+        tipoDocumento,
+        dni: dniLimpio,
+        password,
+      });
 
       authService.guardarSesion(data, recordarme);
 
@@ -208,10 +218,26 @@ export default function Login() {
           )}
 
           <form onSubmit={onSubmit} noValidate>
-            {/* DNI */}
+            {/* Documento */}
             <div className="mb-[18px]">
+              <label htmlFor="tipoDocumento" className="mb-1.5 block text-[13px] font-medium">
+                Tipo de documento <span className="text-primary">*</span>
+              </label>
+              <select
+                id="tipoDocumento"
+                value={tipoDocumento}
+                onChange={(e) => {
+                  setTipoDocumento(e.target.value as TipoDocumento);
+                  setDni("");
+                  setErrorDni(false);
+                }}
+                className={`${inputBase} mb-2 border-line focus:border-primary`}
+              >
+                <option value="DNI">DNI</option>
+                <option value="CE">Carné de Extranjería</option>
+              </select>
               <label htmlFor="dni" className="mb-1.5 block text-[13px] font-medium">
-                DNI <span className="text-primary">*</span>
+                Número de documento <span className="text-primary">*</span>
               </label>
               <div className="relative">
                 <IdCard
@@ -221,10 +247,10 @@ export default function Login() {
                 <input
                   id="dni"
                   type="text"
-                  inputMode="numeric"
-                  maxLength={8}
+                  inputMode={tipoDocumento === "DNI" ? "numeric" : "text"}
+                  maxLength={tipoDocumento === "DNI" ? 8 : 20}
                   autoComplete="username"
-                  placeholder="12345678"
+                  placeholder={tipoDocumento === "DNI" ? "12345678" : "ABC123456"}
                   value={dni}
                   onChange={onChangeDni}
                   onBlur={onBlurDni}
@@ -233,9 +259,17 @@ export default function Login() {
                   }`}
                 />
               </div>
-              <p className="mt-1.5 text-[11.5px] text-ink-muted">8 dígitos, sin puntos ni espacios.</p>
+              <p className="mt-1.5 text-[11.5px] text-ink-muted">
+                {tipoDocumento === "DNI"
+                  ? "8 dígitos, sin puntos ni espacios."
+                  : "Entre 6 y 20 caracteres alfanuméricos."}
+              </p>
               {errorDni && (
-                <p className="mt-1.5 text-xs text-danger">El DNI debe tener exactamente 8 dígitos numéricos.</p>
+                <p className="mt-1.5 text-xs text-danger">
+                  {tipoDocumento === "DNI"
+                    ? "El DNI debe tener exactamente 8 dígitos numéricos."
+                    : "El Carné de Extranjería debe tener entre 6 y 20 caracteres alfanuméricos."}
+                </p>
               )}
             </div>
 

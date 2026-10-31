@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -38,22 +40,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            final String dni = jwtService.extractDni(jwt);
+            final String identity = jwtService.extractIdentity(jwt);
 
-            if (dni != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(dni);
+            if (identity != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(identity);
                 if (userDetails.isEnabled()
-                        && jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                        && jwtService.isTokenValid(jwt, identity)) {
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails, null, userDetails.getAuthorities());
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(auth);
+                    log.debug("JWT válido");
                 }
             }
         } catch (Exception e) {
             // Token inválido → continúa sin autenticar
-            logger.debug("Token JWT inválido: " + e.getMessage());
+            log.debug("Token JWT inválido: {}", e.getMessage());
         }
 
         chain.doFilter(request, response);

@@ -4,6 +4,7 @@ import com.entrepanuelo.dance.dto.inscripcion.BailarinBusquedaResponse;
 import com.entrepanuelo.dance.dto.inscripcion.BailarinDestacadoResponse;
 import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import com.entrepanuelo.dance.exception.BusinessException;
 import com.entrepanuelo.dance.exception.ResourceNotFoundException;
 import com.entrepanuelo.dance.repository.UsuarioRepository;
@@ -23,12 +24,13 @@ public class BailarinServiceImpl implements BailarinService {
 
     @Override
     @Transactional(readOnly = true)
-    public BailarinBusquedaResponse buscarPorDni(String dniActual, String dniBuscado) {
+    public BailarinBusquedaResponse buscarPorDni(
+            String dniActual, TipoDocumento tipoDocumento, String dniBuscado) {
         if (dniActual.equals(dniBuscado)) {
             throw new BusinessException("No puedes buscarte a ti mismo como pareja");
         }
 
-        Usuario usuario = usuarioRepository.findByDni(dniBuscado)
+        Usuario usuario = usuarioRepository.findByTipoDocumentoAndDni(tipoDocumento, dniBuscado)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No existe un bailarín registrado con ese DNI"));
 

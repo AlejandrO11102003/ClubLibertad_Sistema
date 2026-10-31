@@ -3,6 +3,7 @@ package com.entrepanuelo.dance.entity;
 
 
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,8 +26,13 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long id;
 
-    @Column(name = "dni", nullable = false, unique = true, length = 8)
+    @Column(name = "dni", nullable = false, unique = true, length = 20)
     private String dni;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_documento", nullable = false, length = 3)
+    @Builder.Default
+    private TipoDocumento tipoDocumento = TipoDocumento.DNI;
 
     @Column(name = "anio_nacimiento", nullable = false)
     private Integer anioNacimiento;

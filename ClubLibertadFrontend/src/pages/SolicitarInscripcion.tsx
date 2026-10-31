@@ -7,6 +7,7 @@ import {
   bailarinesService,
   concursosService,
   inscripcionesService,
+  TipoDocumento,
 } from "../services/api";
 
 type Alerta = { tipo: "error" | "exito"; texto: string } | null;
@@ -31,6 +32,7 @@ export default function SolicitarInscripcion() {
   const [error, setError] = useState<string | null>(null);
 
   const [categoriaId, setCategoriaId] = useState("");
+  const [parejaTipoDocumento, setParejaTipoDocumento] = useState<TipoDocumento>("DNI");
   const [parejaDni, setParejaDni] = useState("");
   const [pareja, setPareja] = useState<BailarinBusqueda | null>(null);
   const [buscando, setBuscando] = useState(false);
@@ -67,15 +69,25 @@ export default function SolicitarInscripcion() {
     setErrorPareja(null);
     setPareja(null);
 
-    if (!/^\d{8}$/.test(parejaDni.trim())) {
-      setErrorPareja("El DNI debe tener exactamente 8 dígitos.");
+    const documentoValido = parejaTipoDocumento === "DNI"
+      ? /^\d{8}$/.test(parejaDni.trim())
+      : /^[A-Za-z0-9]{6,20}$/.test(parejaDni.trim());
+    if (!documentoValido) {
+      setErrorPareja(
+        parejaTipoDocumento === "DNI"
+          ? "El DNI debe tener exactamente 8 dígitos."
+          : "El Carné de Extranjería debe tener entre 6 y 20 caracteres alfanuméricos."
+      );
       return;
     }
 
     setBuscando(true);
 
     try {
-      const data = await bailarinesService.buscarPorDni(parejaDni.trim());
+      const data = await bailarinesService.buscarPorDni(
+        parejaDni.trim(),
+        parejaTipoDocumento
+      );
       setPareja(data);
     } catch (err: any) {
       setErrorPareja(err?.message || "No se encontró a la pareja.");
@@ -104,6 +116,7 @@ export default function SolicitarInscripcion() {
       await inscripcionesService.crear({
         concursoId: Number(concursoId),
         categoriaId: Number(categoriaId),
+        parejaTipoDocumento,
         parejaDni: parejaDni.trim(),
       });
 
@@ -258,20 +271,35 @@ export default function SolicitarInscripcion() {
                     2. Busca a tu pareja
                   </h2>
                   <p className="mb-4 text-[13px] text-ink-muted">
-                    Ingresa el DNI del bailarín con quien quieres competir.
+                    Ingresa el documento del bailarín con quien quieres competir.
                   </p>
 
                   <div className="flex flex-col gap-2 sm:flex-row">
+                    <select
+                      value={parejaTipoDocumento}
+                      onChange={(e) => {
+                        setParejaTipoDocumento(e.target.value as TipoDocumento);
+                        setParejaDni("");
+                        setPareja(null);
+                      }}
+                      className={`${inputBase} sm:max-w-[210px]`}
+                    >
+                      <option value="DNI">DNI</option>
+                      <option value="CE">Carné de Extranjería</option>
+                    </select>
                     <input
                       value={parejaDni}
                       onChange={(e) => {
-                        setParejaDni(e.target.value.replace(/\D/g, "").slice(0, 8));
+                        const value = parejaTipoDocumento === "DNI"
+                          ? e.target.value.replace(/\D/g, "").slice(0, 8)
+                          : e.target.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 20).toUpperCase();
+                        setParejaDni(value);
                         setPareja(null);
                         setErrorPareja(null);
                       }}
-                      inputMode="numeric"
-                      maxLength={8}
-                      placeholder="DNI de tu pareja"
+                      inputMode={parejaTipoDocumento === "DNI" ? "numeric" : "text"}
+                      maxLength={parejaTipoDocumento === "DNI" ? 8 : 20}
+                      placeholder={parejaTipoDocumento === "DNI" ? "DNI de tu pareja" : "CE de tu pareja"}
                       className={`${inputBase} ${
                         errorPareja ? "border-danger" : ""
                       }`}
@@ -279,7 +307,11 @@ export default function SolicitarInscripcion() {
                     <button
                       type="button"
                       onClick={buscarPareja}
-                      disabled={buscando || parejaDni.length !== 8}
+                      disabled={buscando || (
+                        parejaTipoDocumento === "DNI"
+                          ? parejaDni.length !== 8
+                          : parejaDni.length < 6
+                      )}
                       className="inline-flex items-center justify-center gap-2 rounded-btn bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {buscando ? (
@@ -306,7 +338,7 @@ export default function SolicitarInscripcion() {
                           {pareja.nombre} {pareja.apellido}
                         </p>
                         <p className="text-[11px] text-ink-muted">
-                          DNI {pareja.dni}
+                          {pareja.tipoDocumento || parejaTipoDocumento} {pareja.dni}
                           {pareja.categoria ? ` · ${pareja.categoria}` : ""}
                           {pareja.ciudad ? ` · ${pareja.ciudad}` : ""}
                         </p>

@@ -7,6 +7,7 @@ import com.entrepanuelo.dance.dto.auth.UsuarioResponse;
 import com.entrepanuelo.dance.entity.Perfil;
 import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import com.entrepanuelo.dance.exception.BusinessException;
 import com.entrepanuelo.dance.exception.ResourceNotFoundException;
 import com.entrepanuelo.dance.repository.UsuarioRepository;
@@ -38,13 +39,18 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest req) {
 
         // Validar DNI único
-        if (usuarioRepository.existsByDni(req.getDni())) {
-            throw new BusinessException("El DNI ya está registrado");
+        TipoDocumento tipoDocumento = req.getTipoDocumento() == null
+                ? TipoDocumento.DNI
+                : req.getTipoDocumento();
+
+        if (usuarioRepository.existsByTipoDocumentoAndDni(tipoDocumento, req.getDni())) {
+            throw new BusinessException("El documento ya está registrado");
         }
 
         // Crear Usuario
         Usuario usuario = Usuario.builder()
                 .dni(req.getDni())
+                .tipoDocumento(tipoDocumento)
                 .anioNacimiento(req.getAnioNacimiento())
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .rol(Rol.BAILARIN)
@@ -85,10 +91,14 @@ public class AuthServiceImpl implements AuthService {
     // ============================================================
     @Override
     public AuthResponse login(LoginRequest req) {
+        TipoDocumento tipoDocumento = req.getTipoDocumento() == null
+                ? TipoDocumento.DNI
+                : req.getTipoDocumento();
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(req.getDni(), req.getPassword())
+                    new UsernamePasswordAuthenticationToken(
+                            identity(tipoDocumento, req.getDni()), req.getPassword())
             );
         } catch (DisabledException e) {
             throw new BusinessException("La cuenta está desactivada. Contacta al administrador.");
@@ -96,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("DNI o contraseña incorrectos");
         }
 
-        Usuario usuario = usuarioRepository.findByDni(req.getDni())
+        Usuario usuario = usuarioRepository.findByTipoDocumentoAndDni(tipoDocumento, req.getDni())
                 .orElseThrow(() -> new BusinessException("DNI o contraseña incorrectos"));
 
         String token = jwtService.generateToken(usuario);
@@ -119,5 +129,9 @@ public class AuthServiceImpl implements AuthService {
         Usuario usuario = usuarioRepository.findByDni(dni)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         return UsuarioResponse.from(usuario);
+    }
+
+    private String identity(TipoDocumento tipoDocumento, String documento) {
+        return tipoDocumento.name() + ":" + documento;
     }
 }

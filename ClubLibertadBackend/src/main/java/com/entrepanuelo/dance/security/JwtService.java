@@ -36,20 +36,21 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("rol", usuario.getRol().name());
         claims.put("uid", usuario.getId());
+        claims.put("tipoDocumento", usuario.getTipoDocumento().name());
 
         Date now = new Date();
         Date exp = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .claims(claims)
-                .subject(usuario.getDni())
+                .subject(identity(usuario))
                 .issuedAt(now)
                 .expiration(exp)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String extractDni(String token) {
+    public String extractIdentity(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -57,9 +58,9 @@ public class JwtService {
         return extractClaim(token, c -> c.get("rol", String.class));
     }
 
-    public boolean isTokenValid(String token, String dni) {
-        final String subject = extractDni(token);
-        return subject.equals(dni) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, String identity) {
+        final String subject = extractIdentity(token);
+        return subject.equals(identity) && !isTokenExpired(token);
     }
 
     public boolean isTokenExpired(String token) {
@@ -68,6 +69,10 @@ public class JwtService {
 
     public long getExpirationMs() {
         return expirationMs;
+    }
+
+    private String identity(Usuario usuario) {
+        return usuario.getTipoDocumento().name() + ":" + usuario.getDni();
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {

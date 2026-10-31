@@ -6,6 +6,7 @@ import com.entrepanuelo.dance.dto.inscripcion.BailarinDestacadoResponse;
 import com.entrepanuelo.dance.dto.trayectoria.PerfilPublicoResponse;
 import com.entrepanuelo.dance.service.BailarinService;
 import com.entrepanuelo.dance.service.TrayectoriaService;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +32,12 @@ public class BailarinController {
     @GetMapping("/buscar")
     @Operation(summary = "Buscar un bailarín por DNI para invitarlo como pareja")
     public ResponseEntity<ApiResponse<BailarinBusquedaResponse>> buscar(
+            @RequestParam(defaultValue = "DNI") TipoDocumento tipoDocumento,
             @RequestParam String dni,
             Authentication authentication) {
 
         BailarinBusquedaResponse bailarin =
-                bailarinService.buscarPorDni(authentication.getName(), dni);
+                bailarinService.buscarPorDni(authentication.getName(), tipoDocumento, dni);
 
         return ResponseEntity.ok(
                 ApiResponse.ok("Bailarín encontrado", bailarin));

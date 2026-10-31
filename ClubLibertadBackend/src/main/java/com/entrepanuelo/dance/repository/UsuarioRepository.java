@@ -1,9 +1,8 @@
 package com.entrepanuelo.dance.repository;
 
-
-
 import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +19,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByDni(String dni);
 
     boolean existsByDni(String dni);
+
+    Optional<Usuario> findByTipoDocumentoAndDni(TipoDocumento tipoDocumento, String dni);
+
+    boolean existsByTipoDocumentoAndDni(TipoDocumento tipoDocumento, String dni);
 
     long countByRol(Rol rol);
 

@@ -9,6 +9,7 @@ import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.EstadoConcurso;
 import com.entrepanuelo.dance.entity.enums.EstadoInscripcion;
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import com.entrepanuelo.dance.entity.enums.TipoNotificacion;
 import com.entrepanuelo.dance.exception.BusinessException;
 import com.entrepanuelo.dance.exception.ForbiddenException;
@@ -61,7 +62,12 @@ public class InscripcionServiceImpl implements InscripcionService {
             throw new BusinessException("No puedes invitarte a ti mismo como pareja");
         }
 
-        Usuario pareja = usuarioRepository.findByDni(request.getParejaDni())
+        TipoDocumento tipoDocumento = request.getParejaTipoDocumento() == null
+                ? TipoDocumento.DNI
+                : request.getParejaTipoDocumento();
+
+        Usuario pareja = usuarioRepository.findByTipoDocumentoAndDni(
+                        tipoDocumento, request.getParejaDni())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No existe un bailarín registrado con ese DNI"));
 

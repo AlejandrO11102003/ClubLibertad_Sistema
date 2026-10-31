@@ -1,12 +1,16 @@
 // Configuración centralizada de API y cliente HTTP para Spring Boot
 export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
+export type TipoDocumento = "DNI" | "CE";
+
 export interface LoginRequest {
+  tipoDocumento: TipoDocumento;
   dni: string;
   password: string;
 }
 
 export interface RegistroBailarinRequest {
+  tipoDocumento: TipoDocumento;
   dni: string;
   anioNacimiento: number;
   password: string;
@@ -24,6 +28,7 @@ export interface Perfil {
   id?: number;
   usuarioId: number;
   dni?: string;
+  tipoDocumento?: TipoDocumento;
   anioNacimiento?: number;
   rol?: string;
   nombre?: string;
@@ -124,10 +129,12 @@ export interface Inscripcion {
 export interface InscripcionRequest {
   concursoId: number;
   categoriaId: number;
+  parejaTipoDocumento?: TipoDocumento;
   parejaDni: string;
 }
 
 export interface BailarinBusqueda {
+  tipoDocumento?: TipoDocumento;
   dni: string;
   nombre?: string;
   apellido?: string;
@@ -714,9 +721,12 @@ export const inscripcionesService = {
 
 export const bailarinesService = {
 
-  async buscarPorDni(dni: string): Promise<BailarinBusqueda> {
+  async buscarPorDni(
+    dni: string,
+    tipoDocumento: TipoDocumento = "DNI"
+  ): Promise<BailarinBusqueda> {
     return apiFetchData<BailarinBusqueda>(
-      `/bailarines/buscar?dni=${encodeURIComponent(dni)}`
+      `/bailarines/buscar?tipoDocumento=${tipoDocumento}&dni=${encodeURIComponent(dni)}`
     );
   },
 

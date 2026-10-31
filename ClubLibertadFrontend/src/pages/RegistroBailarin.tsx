@@ -8,7 +8,7 @@ import {
   EyeOff,
   UserPlus,
 } from "lucide-react";
-import { authService, RegistroBailarinRequest } from "../services/api";
+import { authService, RegistroBailarinRequest, TipoDocumento } from "../services/api";
 
 type Alerta = { tipo: "error" | "exito"; texto: string } | null;
 
@@ -31,6 +31,7 @@ export default function RegistroBailarin() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
+    tipoDocumento: "DNI" as TipoDocumento,
     dni: "",
     nombres: "",
     apellidos: "",
@@ -72,8 +73,10 @@ export default function RegistroBailarin() {
   };
 
   const handleDniChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 8);
-    setForm((prev) => ({ ...prev, dni: soloNumeros }));
+    const documento = form.tipoDocumento === "DNI"
+      ? e.target.value.replace(/\D/g, "").slice(0, 8)
+      : e.target.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 20).toUpperCase();
+    setForm((prev) => ({ ...prev, dni: documento }));
     if (errores.dni) {
       setErrores((prev) => {
         const nuevos = { ...prev };
@@ -91,8 +94,13 @@ export default function RegistroBailarin() {
   const validarFormulario = () => {
     const err: Record<string, string> = {};
 
-    if (!/^\d{8}$/.test(form.dni.trim())) {
-      err.dni = "El DNI debe tener exactamente 8 dígitos.";
+    const documentoValido = form.tipoDocumento === "DNI"
+      ? /^\d{8}$/.test(form.dni.trim())
+      : /^[A-Za-z0-9]{6,20}$/.test(form.dni.trim());
+    if (!documentoValido) {
+      err.dni = form.tipoDocumento === "DNI"
+        ? "El DNI debe tener exactamente 8 dígitos."
+        : "El Carné de Extranjería debe tener entre 6 y 20 caracteres alfanuméricos.";
     }
 
     if (!form.fechaNacimiento) {
@@ -151,6 +159,7 @@ export default function RegistroBailarin() {
     setAlerta(null);
 
     const payload: RegistroBailarinRequest = {
+      tipoDocumento: form.tipoDocumento,
       dni: form.dni.trim(),
       anioNacimiento: new Date(form.fechaNacimiento).getFullYear(),
       password: form.password,
@@ -324,18 +333,42 @@ export default function RegistroBailarin() {
               </h3>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {/* DNI */}
+                {/* Documento */}
                 <div>
+                  <label htmlFor="tipoDocumento" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Tipo de documento <span className="text-primary">*</span>
+                  </label>
+                  <select
+                    id="tipoDocumento"
+                    name="tipoDocumento"
+                    value={form.tipoDocumento}
+                    onChange={(e) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        tipoDocumento: e.target.value as TipoDocumento,
+                        dni: "",
+                      }));
+                      setErrores((prev) => {
+                        const next = { ...prev };
+                        delete next.dni;
+                        return next;
+                      });
+                    }}
+                    className={`${inputBase} mb-2 border-line focus:border-primary`}
+                  >
+                    <option value="DNI">DNI</option>
+                    <option value="CE">Carné de Extranjería</option>
+                  </select>
                   <label htmlFor="dni" className="mb-1.5 block text-[13px] font-medium text-ink">
-                    DNI <span className="text-primary">*</span>
+                    Número de documento <span className="text-primary">*</span>
                   </label>
                   <input
                     id="dni"
                     name="dni"
                     type="text"
-                    inputMode="numeric"
-                    maxLength={8}
-                    placeholder="12345678"
+                    inputMode={form.tipoDocumento === "DNI" ? "numeric" : "text"}
+                    maxLength={form.tipoDocumento === "DNI" ? 8 : 20}
+                    placeholder={form.tipoDocumento === "DNI" ? "12345678" : "ABC123456"}
                     value={form.dni}
                     onChange={handleDniChange}
                     className={`${inputBase} ${
