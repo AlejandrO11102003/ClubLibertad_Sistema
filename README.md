@@ -121,6 +121,7 @@ npm start
 | `/admin/inscripciones` | ADMIN | Supervisión de inscripciones |
 | `/admin/bailarines` | ADMIN | Gestión de cuentas de bailarines |
 | `/admin/categorias` | ADMIN | Gestión de categorías |
+| `/admin/anuncios` | ADMIN | Publicidad del carrusel de inicio |
 | `/admin/resultados` | ADMIN | Carga de resultados desde Excel |
 | `/inscripcion/:concursoId` | Autenticado | Solicitar inscripción con pareja |
 | `/inscripciones` | Autenticado | Mis inscripciones |
@@ -139,3 +140,12 @@ El nivel se calcula automáticamente al publicar resultados y se expresa de 0.0 
 - **10%** trayectoria en años.
 
 Si el bailarín todavía no tiene resultados publicados, el nivel queda como **pendiente**.
+
+## Anuncios (publicidad del inicio)
+
+El hero del landing muestra un **carrusel de flyers** cuando existen anuncios activos y vigentes. Si no hay ninguno, se muestra la tarjeta del bailarín con mejor nivel competitivo.
+
+- Se administran en `/admin/anuncios`.
+- Las imágenes se suben desde el panel (JPG, PNG o WEBP, máximo 5 MB) y se guardan en `ClubLibertadBackend/uploads/anuncios/`.
+- Esa carpeta **no se versiona** en Git.
+- Se pueden programar con fecha de inicio y fin, reordenar y activar o desactivar.

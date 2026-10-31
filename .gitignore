@@ -15,6 +15,7 @@
 # ------------------------- Archivos generados -------------------------
 # Backend (Maven)
 ClubLibertadBackend/target/
+uploads/
 ClubLibertadBackend/uploads/
 *.log
 

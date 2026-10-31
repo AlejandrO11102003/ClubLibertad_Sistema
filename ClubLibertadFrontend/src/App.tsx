@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminInscripciones from "./pages/admin/AdminInscripciones";
 import AdminBailarines from "./pages/admin/AdminBailarines";
 import AdminCategorias from "./pages/admin/AdminCategorias";
+import AdminAnuncios from "./pages/admin/AdminAnuncios";
 import SolicitarInscripcion from "./pages/SolicitarInscripcion";
 import MisInscripciones from "./pages/MisInscripciones";
 import MiPareja from "./pages/MiPareja";
@@ -127,6 +128,7 @@ export default function App() {
           <Route path="inscripciones" element={<AdminInscripciones />} />
           <Route path="bailarines" element={<AdminBailarines />} />
           <Route path="categorias" element={<AdminCategorias />} />
+          <Route path="anuncios" element={<AdminAnuncios />} />
         </Route>
       </Routes>
     </BrowserRouter>

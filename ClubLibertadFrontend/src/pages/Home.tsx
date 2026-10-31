@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Concurso, authService, concursosService } from "../services/api";
+import {
+  Anuncio,
+  BailarinDestacado,
+  Concurso,
+  anunciosService,
+  authService,
+  bailarinesService,
+  concursosService,
+  resolverImagen,
+} from "../services/api";
 import useTheme from "../hooks/useTheme";
 import EpHeader from "../components/layout/EpHeader";
+import AnuncioCarrusel from "../components/home/AnuncioCarrusel";
 import "../styles/entrepanuelos.css";
 
 function Estrella({ off = false }: { off?: boolean }) {
@@ -60,6 +70,8 @@ const CONCURSOS_DEMO = [
 export default function Home() {
   const { tema, alternar } = useTheme();
   const [concursos, setConcursos] = useState<Concurso[]>([]);
+  const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
+  const [destacado, setDestacado] = useState<BailarinDestacado | null>(null);
 
   const rol = (authService.obtenerRol() || "").toUpperCase();
   const autenticado = Boolean(authService.obtenerToken());
@@ -77,12 +89,61 @@ export default function Home() {
         // el landing puede funcionar con los ejemplos
       });
 
+    anunciosService
+      .listar()
+      .then((data) => {
+        if (activo) setAnuncios(data);
+      })
+      .catch(() => {
+        // sin publicidad se muestra la tarjeta del bailarín
+      });
+
+    bailarinesService
+      .destacados(1)
+      .then((data) => {
+        if (activo) setDestacado(data[0] || null);
+      })
+      .catch(() => {
+        // se conserva la tarjeta de ejemplo
+      });
+
     return () => {
       activo = false;
     };
   }, []);
 
   const destacados = concursos.filter((c) => c.estado !== "BORRADOR").slice(0, 3);
+
+  const perfilHero = destacado
+    ? {
+        id: destacado.id,
+        nombre:
+          `${destacado.nombre || ""} ${destacado.apellido || ""}`.trim() ||
+          "Bailarín destacado",
+        iniciales:
+          `${destacado.nombre?.[0] || ""}${destacado.apellido?.[0] || ""}`.toUpperCase() ||
+          "EP",
+        detalle:
+          [destacado.ciudad, destacado.categoria].filter(Boolean).join(" · ") || "Perú",
+        foto: destacado.fotografiaUrl ? resolverImagen(destacado.fotografiaUrl) : "",
+        nivel: destacado.nivelEstrellas != null ? Number(destacado.nivelEstrellas) : null,
+        concursos: destacado.totalParticipaciones ?? 0,
+        podios: destacado.totalPrimeros ?? 0,
+        categoria: destacado.categoria || "Sin categoría",
+      }
+    : {
+        id: 0,
+        nombre: "Valeria Rojas",
+        iniciales: "VR",
+        detalle: "Chiclayo · Academia Norte Vivo",
+        foto: "",
+        nivel: 4.6,
+        concursos: 18,
+        podios: 7,
+        categoria: "Juvenil",
+      };
+
+  const estrellasLlenas = perfilHero.nivel != null ? Math.round(perfilHero.nivel) : 0;
 
   return (
     <div className="ep-page ep-home" data-theme={tema}>
@@ -111,7 +172,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="stage" aria-hidden="true">
+            <div className="stage">
               <svg className="hanky" viewBox="0 0 440 440" preserveAspectRatio="xMidYMid slice">
                 <g className="wave">
                   <path
@@ -144,33 +205,75 @@ export default function Home() {
                 </g>
               </svg>
 
-              <div className="profile">
-                <div className="who">
-                  <div className="avatar">VR</div>
-                  <div>
-                    <b>Valeria Rojas</b>
-                    <span>Chiclayo · Academia Norte Vivo</span>
+              {anuncios.length > 0 ? (
+                <AnuncioCarrusel anuncios={anuncios} />
+              ) : (
+                <div className="profile">
+                  <div className="who">
+                    {perfilHero.foto ? (
+                      <img
+                        className="avatar"
+                        src={perfilHero.foto}
+                        alt={`${perfilHero.nombre}`}
+                        style={{ objectFit: "cover" }}
+                      />
+                    ) : (
+                      <div className="avatar">{perfilHero.iniciales}</div>
+                    )}
+                    <div>
+                      <b>{perfilHero.nombre}</b>
+                      <span>{perfilHero.detalle}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="level">
-                  <strong>4.6</strong>
-                  <div className="stars">
-                    <Estrella /><Estrella /><Estrella /><Estrella /><Estrella off />
+
+                  <div className="level">
+                    <strong>
+                      {perfilHero.nivel != null ? perfilHero.nivel.toFixed(1) : "—"}
+                    </strong>
+                    <div className="stars">
+                      {Array.from({ length: 5 }).map((_, indice) => (
+                        <Estrella key={indice} off={indice >= estrellasLlenas} />
+                      ))}
+                    </div>
                   </div>
+
+                  <span style={{ fontSize: 13, color: "var(--muted)" }}>
+                    Nivel competitivo
+                  </span>
+
+                  <div className="stats">
+                    <div>
+                      <b>{perfilHero.concursos}</b>
+                      <span>Concursos</span>
+                    </div>
+                    <div>
+                      <b>{perfilHero.podios}</b>
+                      <span>Podios</span>
+                    </div>
+                    <div>
+                      <b style={{ fontSize: 15, lineHeight: 1.9 }}>
+                        {perfilHero.categoria}
+                      </b>
+                      <span>Categoría</span>
+                    </div>
+                  </div>
+
+                  <div className="badges">
+                    <span className="chip">Top de la comunidad</span>
+                    <span className="chip">{perfilHero.categoria}</span>
+                  </div>
+
+                  {perfilHero.id > 0 && (
+                    <Link
+                      className="btn ghost sm"
+                      to={`/bailarines/${perfilHero.id}`}
+                      style={{ marginTop: 16 }}
+                    >
+                      Ver perfil
+                    </Link>
+                  )}
                 </div>
-                <span style={{ fontSize: 13, color: "var(--muted)" }}>
-                  Nivel competitivo
-                </span>
-                <div className="stats">
-                  <div><b>18</b><span>Concursos</span></div>
-                  <div><b>7</b><span>Podios</span></div>
-                  <div><b>212</b><span>Admiradores</span></div>
-                </div>
-                <div className="badges">
-                  <span className="chip">Campeón de campeones</span>
-                  <span className="chip">Podio selectivo</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </section>

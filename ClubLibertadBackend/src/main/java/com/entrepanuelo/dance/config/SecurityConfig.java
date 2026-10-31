@@ -46,6 +46,8 @@ public class SecurityConfig {
                         // Consulta pública
                         .requestMatchers(HttpMethod.GET, "/api/concursos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/anuncios").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/bailarines/destacados").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/bailarines/*/perfil-publico").permitAll()
 

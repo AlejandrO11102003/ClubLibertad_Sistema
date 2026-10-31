@@ -919,3 +919,104 @@ export const adminResultadosService = {
     URL.revokeObjectURL(url);
   },
 };
+
+
+// =====================================================================
+// Anuncios publicitarios (carrusel del landing)
+// =====================================================================
+
+export interface Anuncio {
+  id: number;
+  titulo: string;
+  entidad?: string;
+  descripcion?: string;
+  imagenUrl: string;
+  enlaceUrl?: string;
+  activo: boolean;
+  orden: number;
+  fechaInicio?: string;
+  fechaFin?: string;
+  vigente?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AnuncioRequest {
+  titulo: string;
+  entidad?: string;
+  descripcion?: string;
+  imagenUrl: string;
+  enlaceUrl?: string;
+  activo?: boolean;
+  orden?: number;
+  fechaInicio?: string;
+  fechaFin?: string;
+}
+
+export interface ImagenSubida {
+  url: string;
+}
+
+/**
+ * Convierte una ruta relativa del backend (/uploads/...) en una URL absoluta.
+ * Las URLs externas se devuelven sin cambios.
+ */
+export function resolverImagen(url?: string | null): string {
+  if (!url) return "";
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+
+  const origen = API_URL.replace(/\/api\/?$/i, "");
+  return `${origen}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+export const anunciosService = {
+
+  async listar(): Promise<Anuncio[]> {
+    return apiFetchData<Anuncio[]>("/anuncios");
+  },
+};
+
+export const adminAnunciosService = {
+
+  async listar(): Promise<Anuncio[]> {
+    return apiFetchData<Anuncio[]>("/admin/anuncios");
+  },
+
+  async crear(data: AnuncioRequest): Promise<Anuncio> {
+    return apiFetchData<Anuncio>("/admin/anuncios", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async actualizar(id: number | string, data: AnuncioRequest): Promise<Anuncio> {
+    return apiFetchData<Anuncio>(`/admin/anuncios/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async cambiarActivo(id: number | string, activo: boolean): Promise<Anuncio> {
+    return apiFetchData<Anuncio>(`/admin/anuncios/${id}/activo`, {
+      method: "PATCH",
+      body: JSON.stringify({ activo }),
+    });
+  },
+
+  async mover(id: number | string, direccion: "SUBIR" | "BAJAR"): Promise<Anuncio[]> {
+    return apiFetchData<Anuncio[]>(`/admin/anuncios/${id}/mover`, {
+      method: "PATCH",
+      body: JSON.stringify({ direccion }),
+    });
+  },
+
+  async eliminar(id: number | string): Promise<void> {
+    await apiFetchData<null>(`/admin/anuncios/${id}`, { method: "DELETE" });
+  },
+
+  async subirImagen(archivo: File): Promise<ImagenSubida> {
+    const formData = new FormData();
+    formData.append("archivo", archivo);
+    return apiUpload<ImagenSubida>("/admin/anuncios/imagen", formData);
+  },
+};

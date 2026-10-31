@@ -3,6 +3,7 @@ import {
   ClipboardList,
   FileSpreadsheet,
   LayoutDashboard,
+  Megaphone,
   Tags,
   Trophy,
   Users,
@@ -26,6 +27,7 @@ const SECCIONES = [
       { label: "Inscripciones", to: "/admin/inscripciones", icon: ClipboardList, end: false },
       { label: "Bailarines", to: "/admin/bailarines", icon: Users, end: false },
       { label: "Categorías", to: "/admin/categorias", icon: Tags, end: false },
+      { label: "Anuncios", to: "/admin/anuncios", icon: Megaphone, end: false },
     ],
   },
   {
