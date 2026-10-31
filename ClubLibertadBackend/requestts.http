@@ -1,0 +1,497 @@
+@baseUrl = http://localhost:8080
+@token = 
+@adminToken = 
+@concursoId = 1
+@categoriaId = 1
+@inscripcionId = 1
+@usuarioId = 2
+@notificacionId = 1
+@resultadoArchivo = ./resultados.xlsx
+
+### ============================================================
+### HEALTH Y DOCUMENTACION
+### ============================================================
+
+### Health
+GET {{baseUrl}}/api/health
+
+### Swagger UI
+GET {{baseUrl}}/swagger-ui/index.html
+
+### OpenAPI JSON
+GET {{baseUrl}}/v3/api-docs
+
+
+### ============================================================
+### AUTENTICACION
+### ============================================================
+
+### Login administrador
+# Copia data.token de la respuesta en @adminToken
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "dni": "00000001",
+  "password": "admin123"
+}
+
+### Login bailarín
+# Copia data.token de la respuesta en @token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "dni": "12345678",
+  "password": "bailarin123"
+}
+
+### Registrar bailarín
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "dni": "22334455",
+  "anioNacimiento": 2001,
+  "password": "Prueba123!",
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "email": "juan@example.com",
+  "telefono": "987654321",
+  "genero": "MASCULINO",
+  "categoria": "Adultos",
+  "ciudad": "Lima",
+  "academiaActual": "Club Libertad"
+}
+
+### Usuario autenticado
+# Actualmente /api/auth/** está configurado como público,
+# pero este endpoint necesita autenticación internamente.
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+
+### ============================================================
+### CONSULTAS PUBLICAS
+### ============================================================
+
+### Listar concursos publicados
+GET {{baseUrl}}/api/concursos
+
+### Obtener concurso público
+GET {{baseUrl}}/api/concursos/{{concursoId}}
+
+### Listar categorías activas
+GET {{baseUrl}}/api/categorias
+
+### Listar anuncios vigentes
+GET {{baseUrl}}/api/anuncios
+
+### Bailarines destacados
+GET {{baseUrl}}/api/bailarines/destacados?limite=6
+
+### Perfil público de bailarín
+GET {{baseUrl}}/api/bailarines/{{usuarioId}}/perfil-publico
+
+### Resultados públicos de concurso
+GET {{baseUrl}}/api/concursos/{{concursoId}}/resultados
+
+
+### ============================================================
+### PERFIL Y TRAYECTORIA - BAILARIN
+### ============================================================
+
+### Obtener mi perfil
+GET {{baseUrl}}/api/perfil
+Authorization: Bearer {{token}}
+
+### Actualizar mi perfil
+PUT {{baseUrl}}/api/perfil
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "email": "juan@example.com",
+  "telefono": "987654321",
+  "ciudad": "Lima",
+  "genero": "MASCULINO",
+  "categoria": "Adultos",
+  "academiaActual": "Club Libertad",
+  "anioInicio": 2018,
+  "marineraFavorita": "Norteña",
+  "biografia": "Bailarín de marinera.",
+  "fotografiaUrl": "/uploads/foto.jpg"
+}
+
+### Obtener mi trayectoria
+GET {{baseUrl}}/api/trayectoria/mia
+Authorization: Bearer {{token}}
+
+### Buscar bailarín por DNI
+GET {{baseUrl}}/api/bailarines/buscar?dni=87654321
+Authorization: Bearer {{token}}
+
+
+### ============================================================
+### INSCRIPCIONES Y PAREJAS
+### ============================================================
+
+### Crear solicitud de inscripción
+POST {{baseUrl}}/api/inscripciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "concursoId": {{concursoId}},
+  "categoriaId": {{categoriaId}},
+  "parejaDni": "87654321"
+}
+
+### Mis inscripciones
+GET {{baseUrl}}/api/inscripciones/mias
+Authorization: Bearer {{token}}
+
+### Solicitudes pendientes
+GET {{baseUrl}}/api/inscripciones/pendientes
+Authorization: Bearer {{token}}
+
+### Aceptar solicitud
+POST {{baseUrl}}/api/inscripciones/{{inscripcionId}}/aceptar
+Authorization: Bearer {{token}}
+
+### Rechazar solicitud
+POST {{baseUrl}}/api/inscripciones/{{inscripcionId}}/rechazar
+Authorization: Bearer {{token}}
+
+
+### ============================================================
+### CREDENCIALES
+### ============================================================
+
+### Listar mis credenciales
+GET {{baseUrl}}/api/credenciales
+Authorization: Bearer {{token}}
+
+### Obtener credencial de inscripción
+GET {{baseUrl}}/api/credenciales/{{inscripcionId}}
+Authorization: Bearer {{token}}
+
+
+### ============================================================
+### NOTIFICACIONES
+### ============================================================
+
+### Listar notificaciones
+GET {{baseUrl}}/api/notificaciones
+Authorization: Bearer {{token}}
+
+### Contar notificaciones no leídas
+GET {{baseUrl}}/api/notificaciones/no-leidas
+Authorization: Bearer {{token}}
+
+### Marcar notificación como leída
+PATCH {{baseUrl}}/api/notificaciones/{{notificacionId}}/leer
+Authorization: Bearer {{token}}
+
+### Marcar todas como leídas
+PATCH {{baseUrl}}/api/notificaciones/leer-todas
+Authorization: Bearer {{token}}
+
+
+### ============================================================
+### ADMIN - DASHBOARD
+### ============================================================
+
+### Dashboard administrativo
+GET {{baseUrl}}/api/admin/dashboard
+Authorization: Bearer {{adminToken}}
+
+
+### ============================================================
+### ADMIN - BAILARINES
+### ============================================================
+
+### Listar bailarines
+GET {{baseUrl}}/api/admin/bailarines
+Authorization: Bearer {{adminToken}}
+
+### Filtrar bailarines
+GET {{baseUrl}}/api/admin/bailarines?texto=Sofia&activo=true&categoria=Adultos
+Authorization: Bearer {{adminToken}}
+
+### Obtener bailarín
+GET {{baseUrl}}/api/admin/bailarines/{{usuarioId}}
+Authorization: Bearer {{adminToken}}
+
+### Activar cuenta
+PATCH {{baseUrl}}/api/admin/bailarines/{{usuarioId}}/activo
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "activo": true
+}
+
+### Desactivar cuenta
+PATCH {{baseUrl}}/api/admin/bailarines/{{usuarioId}}/activo
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "activo": false
+}
+
+
+### ============================================================
+### ADMIN - CATEGORIAS
+### ============================================================
+
+### Listar todas las categorías
+GET {{baseUrl}}/api/admin/categorias
+Authorization: Bearer {{adminToken}}
+
+### Crear categoría
+POST {{baseUrl}}/api/admin/categorias
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "nombre": "Adultos",
+  "edadMin": 18,
+  "edadMax": 39,
+  "genero": "MIXTO",
+  "activa": true
+}
+
+### Actualizar categoría
+PUT {{baseUrl}}/api/admin/categorias/{{categoriaId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "nombre": "Adultos Actualizado",
+  "edadMin": 18,
+  "edadMax": 39,
+  "genero": "MIXTO",
+  "activa": true
+}
+
+### Activar categoría
+PATCH {{baseUrl}}/api/admin/categorias/{{categoriaId}}/activa
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "activa": true
+}
+
+### Desactivar categoría
+PATCH {{baseUrl}}/api/admin/categorias/{{categoriaId}}/activa
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "activa": false
+}
+
+
+### ============================================================
+### ADMIN - CONCURSOS
+### ============================================================
+
+### Listar todos los concursos
+GET {{baseUrl}}/api/admin/concursos
+Authorization: Bearer {{adminToken}}
+
+### Obtener concurso
+GET {{baseUrl}}/api/admin/concursos/{{concursoId}}
+Authorization: Bearer {{adminToken}}
+
+### Crear concurso
+POST {{baseUrl}}/api/admin/concursos
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "nombre": "Concurso Nacional 2026",
+  "bannerUrl": "/uploads/banner.jpg",
+  "fechaInicio": "2026-11-15",
+  "fechaFin": "2026-11-16",
+  "lugar": "Lima",
+  "estado": "BORRADOR",
+  "categorias": [
+    {
+      "categoriaId": {{categoriaId}},
+      "cupo": 50,
+      "precio": 80.00
+    }
+  ]
+}
+
+### Actualizar concurso
+PUT {{baseUrl}}/api/admin/concursos/{{concursoId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "nombre": "Concurso Nacional 2026 Actualizado",
+  "bannerUrl": "/uploads/banner.jpg",
+  "fechaInicio": "2026-11-15",
+  "fechaFin": "2026-11-16",
+  "lugar": "Lima",
+  "estado": "PUBLICADO",
+  "categorias": [
+    {
+      "categoriaId": {{categoriaId}},
+      "cupo": 50,
+      "precio": 80.00
+    }
+  ]
+}
+
+### Eliminar concurso
+DELETE {{baseUrl}}/api/admin/concursos/{{concursoId}}
+Authorization: Bearer {{adminToken}}
+
+
+### ============================================================
+### ADMIN - INSCRIPCIONES
+### ============================================================
+
+### Listar inscripciones
+GET {{baseUrl}}/api/admin/inscripciones
+Authorization: Bearer {{adminToken}}
+
+### Filtrar inscripciones
+GET {{baseUrl}}/api/admin/inscripciones?concursoId={{concursoId}}&categoriaId={{categoriaId}}&estado=PENDIENTE&texto=12345678
+Authorization: Bearer {{adminToken}}
+
+### Obtener inscripción
+GET {{baseUrl}}/api/admin/inscripciones/{{inscripcionId}}
+Authorization: Bearer {{adminToken}}
+
+
+### ============================================================
+### ADMIN - ANUNCIOS
+### ============================================================
+
+### Listar todos los anuncios
+GET {{baseUrl}}/api/admin/anuncios
+Authorization: Bearer {{adminToken}}
+
+### Crear anuncio
+POST {{baseUrl}}/api/admin/anuncios
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "titulo": "Concurso Nacional",
+  "entidad": "Club Libertad",
+  "descripcion": "Inscripciones abiertas.",
+  "imagenUrl": "/uploads/anuncios/banner.jpg",
+  "enlaceUrl": "http://localhost:3000/concursos",
+  "activo": true,
+  "orden": 1,
+  "fechaInicio": "2026-10-01",
+  "fechaFin": "2026-12-31"
+}
+
+### Actualizar anuncio
+PUT {{baseUrl}}/api/admin/anuncios/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "titulo": "Concurso Nacional Actualizado",
+  "entidad": "Club Libertad",
+  "descripcion": "Inscripciones abiertas.",
+  "imagenUrl": "/uploads/anuncios/banner.jpg",
+  "enlaceUrl": "http://localhost:3000/concursos",
+  "activo": true,
+  "orden": 1,
+  "fechaInicio": "2026-10-01",
+  "fechaFin": "2026-12-31"
+}
+
+### Activar anuncio
+PATCH {{baseUrl}}/api/admin/anuncios/1/activo
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "activo": true
+}
+
+### Desactivar anuncio
+PATCH {{baseUrl}}/api/admin/anuncios/1/activo
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "activo": false
+}
+
+### Mover anuncio arriba
+PATCH {{baseUrl}}/api/admin/anuncios/1/mover
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "direccion": "SUBIR"
+}
+
+### Mover anuncio abajo
+PATCH {{baseUrl}}/api/admin/anuncios/1/mover
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "direccion": "BAJAR"
+}
+
+### Eliminar anuncio
+DELETE {{baseUrl}}/api/admin/anuncios/1
+Authorization: Bearer {{adminToken}}
+
+### Subir imagen de anuncio
+POST {{baseUrl}}/api/admin/anuncios/imagen
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="archivo"; filename="banner.jpg"
+Content-Type: image/jpeg
+
+< ./banner.jpg
+------Boundary--
+
+
+### ============================================================
+### ADMIN - RESULTADOS
+### ============================================================
+
+### Descargar plantilla Excel
+GET {{baseUrl}}/api/admin/resultados/plantilla
+Authorization: Bearer {{adminToken}}
+
+### Importar resultados Excel
+POST {{baseUrl}}/api/admin/resultados/importar?concursoId={{concursoId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="archivo"; filename="resultados.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< {{resultadoArchivo}}
+------Boundary--
+
+### Listar importaciones
+GET {{baseUrl}}/api/admin/resultados/importaciones
+Authorization: Bearer {{adminToken}}
+
+### Listar resultados administrativos
+GET {{baseUrl}}/api/admin/resultados?concursoId={{concursoId}}
+Authorization: Bearer {{adminToken}}

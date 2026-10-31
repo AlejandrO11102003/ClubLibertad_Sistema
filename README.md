@@ -27,7 +27,40 @@ Copy-Item .env.example .env
 > En producción deben sobreescribirse con variables de entorno
 > (`DB_PASSWORD`, `JWT_SECRET`, `CORS_ORIGINS`, etc.).
 
-## Base de datos (Docker)
+## Ejecutar todo con Docker
+
+Desde la carpeta raíz del proyecto:
+
+```powershell
+docker compose up -d --build
+docker compose ps
+```
+
+La aplicación estará disponible en:
+
+- Frontend: `http://localhost:3000`
+- API: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger-ui.html`
+
+Para ver los logs:
+
+```powershell
+docker compose logs -f backend
+```
+
+Para detener los contenedores conservando los datos:
+
+```powershell
+docker compose down
+```
+
+Para detenerlos y borrar también la base de datos:
+
+```powershell
+docker compose down -v
+```
+
+### Base de datos
 
 La base de datos corre en el puerto **5433** del host para no chocar con un PostgreSQL local en el 5432.
 
