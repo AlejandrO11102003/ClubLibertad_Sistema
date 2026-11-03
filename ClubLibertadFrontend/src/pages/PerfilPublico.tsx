@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Award,
+  Heart,
   MapPin,
   Share2,
   Star,
@@ -60,6 +61,7 @@ export default function PerfilPublico() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
+  const [procesandoAdmiracion, setProcesandoAdmiracion] = useState(false);
 
   const autenticado = Boolean(authService.obtenerToken());
   const usuarioActual = authService.obtenerUsuario();
@@ -105,6 +107,23 @@ export default function PerfilPublico() {
       setTimeout(() => setCopiado(false), 2500);
     } catch {
       // sin portapapeles
+    }
+  };
+
+  const alternarAdmiracion = async () => {
+    if (!perfil || !autenticado || esMiPerfil || procesandoAdmiracion) return;
+    setProcesandoAdmiracion(true);
+    try {
+      const estado = perfil.admiradoPorUsuario
+        ? await bailarinesService.dejarDeAdmirar(perfil.usuarioId)
+        : await bailarinesService.admirar(perfil.usuarioId);
+      setPerfil((actual) => actual
+        ? { ...actual, ...estado }
+        : actual);
+    } catch (err: any) {
+      setError(err?.message || "No se pudo actualizar la admiración.");
+    } finally {
+      setProcesandoAdmiracion(false);
     }
   };
 
@@ -186,6 +205,20 @@ export default function PerfilPublico() {
                   </div>
 
                   <div className="flex flex-wrap gap-2 sm:pb-1">
+                    {!esMiPerfil && autenticado && (
+                      <button
+                        onClick={alternarAdmiracion}
+                        disabled={procesandoAdmiracion}
+                        className={`inline-flex items-center gap-1.5 rounded-btn border px-4 py-2 text-[13px] font-semibold transition ${
+                          perfil.admiradoPorUsuario
+                            ? "border-primary bg-blush text-primary"
+                            : "border-line text-ink-muted hover:border-primary hover:text-primary"
+                        } disabled:opacity-60`}
+                      >
+                        <Heart size={15} className={perfil.admiradoPorUsuario ? "fill-primary" : ""} />
+                        {perfil.admiradoPorUsuario ? "Admirando" : "Admirar"}
+                      </button>
+                    )}
                     {esMiPerfil && (
                       <Link
                         to="/perfil"
@@ -210,6 +243,10 @@ export default function PerfilPublico() {
                         Academia: <strong className="text-ink">{perfil.academiaActual}</strong>
                       </span>
                     )}
+                    <p className="mt-4 flex items-center gap-1.5 text-sm text-ink-muted">
+                      <Heart size={15} className="text-primary" />
+                      <strong className="text-ink">{perfil.totalAdmiradores}</strong> admiradores
+                    </p>
                     {perfil.anioInicio && (
                       <span>
                         Bailarín desde: <strong className="text-ink">{perfil.anioInicio}</strong>

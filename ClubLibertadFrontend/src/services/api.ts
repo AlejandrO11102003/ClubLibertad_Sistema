@@ -293,6 +293,8 @@ export interface PerfilPublico {
   totalPrimeros: number;
   totalSegundos: number;
   totalTerceros: number;
+  totalAdmiradores: number;
+  admiradoPorUsuario: boolean;
   promedioPosicion?: number;
   mejorPosicion?: number;
   logros: Logro[];
@@ -760,6 +762,14 @@ export const bailarinesService = {
     return apiFetchData<PerfilPublico>(
       `/bailarines/${usuarioId}/perfil-publico`
     );
+  },
+
+  async admirar(usuarioId: number | string): Promise<{ totalAdmiradores: number; admiradoPorUsuario: boolean }> {
+    return apiFetchData(`/bailarines/${usuarioId}/admiradores`, { method: "POST" });
+  },
+
+  async dejarDeAdmirar(usuarioId: number | string): Promise<{ totalAdmiradores: number; admiradoPorUsuario: boolean }> {
+    return apiFetchData(`/bailarines/${usuarioId}/admiradores`, { method: "DELETE" });
   },
 
   async destacados(limite: number = 6): Promise<BailarinDestacado[]> {

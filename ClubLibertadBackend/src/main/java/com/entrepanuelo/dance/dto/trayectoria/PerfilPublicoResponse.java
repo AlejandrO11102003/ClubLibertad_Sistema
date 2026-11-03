@@ -30,6 +30,8 @@ public class PerfilPublicoResponse {
     private int totalPrimeros;
     private int totalSegundos;
     private int totalTerceros;
+    private long totalAdmiradores;
+    private boolean admiradoPorUsuario;
     private BigDecimal promedioPosicion;
     private Integer mejorPosicion;
 

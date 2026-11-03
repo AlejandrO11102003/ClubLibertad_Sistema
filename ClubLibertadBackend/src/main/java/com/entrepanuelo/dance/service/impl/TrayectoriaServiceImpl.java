@@ -12,6 +12,7 @@ import com.entrepanuelo.dance.exception.ResourceNotFoundException;
 import com.entrepanuelo.dance.repository.LogroRepository;
 import com.entrepanuelo.dance.repository.ResultadoRepository;
 import com.entrepanuelo.dance.repository.UsuarioRepository;
+import com.entrepanuelo.dance.repository.AdmiradorRepository;
 import com.entrepanuelo.dance.service.TrayectoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class TrayectoriaServiceImpl implements TrayectoriaService {
     private final UsuarioRepository usuarioRepository;
     private final ResultadoRepository resultadoRepository;
     private final LogroRepository logroRepository;
+    private final AdmiradorRepository admiradorRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -98,6 +100,7 @@ public class TrayectoriaServiceImpl implements TrayectoriaService {
                 .totalPrimeros(calculo.totalPrimeros())
                 .totalSegundos(calculo.totalSegundos())
                 .totalTerceros(calculo.totalTerceros())
+                .totalAdmiradores(admiradorRepository.countByAdmirado_Id(usuario.getId()))
                 .promedioPosicion(calculo.promedioPosicion())
                 .mejorPosicion(calculo.mejorPosicion())
                 .logros(logros.stream().map(LogroResponse::from).toList())

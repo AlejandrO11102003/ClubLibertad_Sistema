@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/bailarines/destacados").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/bailarines/*/perfil-publico").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/bailarines/*/admiradores").authenticated()
 
                         // Todo lo demás autenticado
                         .anyRequest().authenticated()
