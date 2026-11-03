@@ -24,6 +24,8 @@ services:
       context: ./ClubLibertadBackend
     container_name: entre_panuelos_backend
     restart: unless-stopped
+    env_file:
+      - ./ClubLibertadBackend/.env
     environment:
       DB_URL: jdbc:postgresql://db:5432/entre_panuelos
       DB_USERNAME: postgres

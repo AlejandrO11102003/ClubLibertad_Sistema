@@ -8,6 +8,9 @@ import com.entrepanuelo.dance.dto.auth.LoginRequest;
 import com.entrepanuelo.dance.dto.auth.RegisterRequest;
 import com.entrepanuelo.dance.dto.auth.UsuarioResponse;
 import com.entrepanuelo.dance.service.AuthService;
+import com.entrepanuelo.dance.dto.auth.ForgotPasswordRequest;
+import com.entrepanuelo.dance.dto.auth.ResetPasswordRequest;
+import com.entrepanuelo.dance.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,6 +27,23 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        String emailEnmascarado = passwordResetService.requestReset(request);
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Si el documento tiene un correo registrado, recibirás un enlace de recuperación",
+                emailEnmascarado));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok("Contraseña actualizada correctamente", null));
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Registrar nuevo bailarín")

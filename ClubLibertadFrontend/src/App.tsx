@@ -26,6 +26,7 @@ import Credenciales from "./pages/Credenciales";
 import CredencialDetalle from "./pages/Credencial";
 import RequireAuth from "./components/RequireAuth";
 import PublicLayout from "./components/layout/PublicLayout";
+import RestablecerContrasena from "./pages/RestablecerContrasena";
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<RegistroBailarin />} />
         <Route path="/registro-bailarin" element={<RegistroBailarin />} />
+        <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
 
         <Route element={<PublicLayout />}>
 

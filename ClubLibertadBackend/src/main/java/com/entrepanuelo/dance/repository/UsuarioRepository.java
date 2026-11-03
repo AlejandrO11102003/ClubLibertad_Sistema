@@ -24,6 +24,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByTipoDocumentoAndDni(TipoDocumento tipoDocumento, String dni);
 
+    Optional<Usuario> findFirstByPerfil_EmailIgnoreCase(String email);
+
     long countByRol(Rol rol);
 
     List<Usuario> findByRolOrderByCreatedAtDesc(Rol rol);

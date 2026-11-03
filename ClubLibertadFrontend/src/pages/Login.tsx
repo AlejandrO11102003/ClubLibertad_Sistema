@@ -32,6 +32,8 @@ export default function Login() {
   const [errorPassword, setErrorPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [alerta, setAlerta] = useState<Alerta>(null);
+  const [mostrarRecuperacion, setMostrarRecuperacion] = useState(false);
+  const [enviandoRecuperacion, setEnviandoRecuperacion] = useState(false);
 
   const onChangeDni = (e: ChangeEvent<HTMLInputElement>) => {
     const value = tipoDocumento === "DNI"
@@ -106,6 +108,35 @@ export default function Login() {
       setAlerta({ tipo: "error", texto: mensaje });
     } finally {
       setCargando(false);
+    }
+  };
+
+  const solicitarRecuperacion = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const dniLimpio = dni.trim();
+    if (!validarDocumento(tipoDocumento, dniLimpio)) {
+      setErrorDni(true);
+      setAlerta({ tipo: "error", texto: "Primero ingresa un documento válido." });
+      return;
+    }
+
+    setEnviandoRecuperacion(true);
+    try {
+      const email = await authService.forgotPassword({
+        tipoDocumento,
+        dni: dniLimpio,
+      });
+      setAlerta({
+        tipo: "exito",
+        texto: email
+          ? `Enviamos el enlace de recuperación al correo ${email}.`
+          : "Si el documento tiene un correo registrado, recibirás un enlace de recuperación.",
+      });
+      setMostrarRecuperacion(false);
+    } catch (err: any) {
+      setAlerta({ tipo: "error", texto: err?.message || "No se pudo procesar la solicitud." });
+    } finally {
+      setEnviandoRecuperacion(false);
     }
   };
 
@@ -304,6 +335,7 @@ export default function Login() {
                   {verPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+
               {errorPassword && (
                 <p className="mt-1.5 text-xs text-danger">La contraseña debe tener al menos 6 caracteres.</p>
               )}
@@ -322,6 +354,7 @@ export default function Login() {
               </label>
               <button
                 type="button"
+                onClick={() => setMostrarRecuperacion(true)}
                 className="font-medium text-primary no-underline hover:underline cursor-pointer bg-transparent border-0 p-0 text-[13px]"
               >
                 ¿Olvidaste tu contraseña?
@@ -342,6 +375,24 @@ export default function Login() {
               <span>{cargando ? "Ingresando…" : "Ingresar"}</span>
             </button>
           </form>
+
+          {mostrarRecuperacion && (
+            <div className="mb-5 rounded-btn border border-line bg-cream p-4">
+              <p className="mb-3 text-sm font-semibold text-ink">Recuperar contraseña</p>
+              <p className="mb-3 text-xs leading-relaxed text-ink-muted">
+                Usaremos el correo asociado a tu documento. Nunca puedes reemplazarlo por otro correo desde aquí.
+              </p>
+              <form onSubmit={solicitarRecuperacion} className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={enviandoRecuperacion}
+                  className="w-full rounded-btn bg-primary px-3 py-2.5 text-xs font-semibold text-white disabled:opacity-70"
+                >
+                  {enviandoRecuperacion ? "Enviando…" : `Enviar al correo asociado`}
+                </button>
+              </form>
+            </div>
+          )}
 
           <p className="mt-8 text-center text-[13px] leading-relaxed text-ink-muted">
             Al iniciar sesión aceptas nuestros{" "}

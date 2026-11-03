@@ -9,6 +9,16 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  tipoDocumento: TipoDocumento;
+  dni: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
 export interface RegistroBailarinRequest {
   tipoDocumento: TipoDocumento;
   dni: string;
@@ -515,6 +525,20 @@ export async function apiUpload<T = any>(
 
 
 export const authService = {
+
+  async forgotPassword(data: ForgotPasswordRequest): Promise<string | null> {
+    return apiFetchData<string | null>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async resetPassword(data: ResetPasswordRequest): Promise<void> {
+    await apiFetchData<void>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     return apiFetchData<LoginResponse>("/auth/login", {
