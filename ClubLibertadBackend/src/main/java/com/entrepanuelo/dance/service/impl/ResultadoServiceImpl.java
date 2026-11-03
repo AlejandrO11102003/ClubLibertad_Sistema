@@ -395,20 +395,6 @@ public class ResultadoServiceImpl implements ResultadoService {
             return null;
         }
 
-        private EtapaResultado parseEtapa(String valor, List<String> errores) {
-            if (valor == null || valor.isBlank()) {
-                errores.add("la etapa es obligatoria");
-                return null;
-            }
-
-            try {
-                return EtapaResultado.valueOf(normalizar(valor).toUpperCase());
-            } catch (IllegalArgumentException e) {
-                errores.add("la etapa debe ser ELIMINATORIA, SEMIFINAL o FINAL");
-                return null;
-            }
-        }
-
         try {
             int posicion = new BigDecimal(valor.replace(",", ".")).intValueExact();
             if (posicion <= 0) {
@@ -418,6 +404,20 @@ public class ResultadoServiceImpl implements ResultadoService {
             return posicion;
         } catch (Exception e) {
             errores.add("la posición debe ser un número entero");
+            return null;
+        }
+    }
+
+    private EtapaResultado parseEtapa(String valor, List<String> errores) {
+        if (valor == null || valor.isBlank()) {
+            errores.add("la etapa es obligatoria");
+            return null;
+        }
+
+        try {
+            return EtapaResultado.valueOf(normalizar(valor).toUpperCase());
+        } catch (IllegalArgumentException e) {
+            errores.add("la etapa debe ser ELIMINATORIA, SEMIFINAL o FINAL");
             return null;
         }
     }
