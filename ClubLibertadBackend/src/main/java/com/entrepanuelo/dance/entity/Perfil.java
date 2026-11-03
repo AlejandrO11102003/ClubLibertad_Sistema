@@ -40,6 +40,9 @@ public class Perfil {
     @Column(name = "ciudad", length = 100)
     private String ciudad;
 
+    @Column(name = "nacionalidad", length = 100)
+    private String nacionalidad;
+
     @Column(name = "email", length = 150)
     private String email;
 

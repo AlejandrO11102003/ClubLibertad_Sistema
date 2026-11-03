@@ -3,6 +3,7 @@ package com.entrepanuelo.dance.dto.perfil;
 import com.entrepanuelo.dance.entity.Perfil;
 import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.Rol;
+import com.entrepanuelo.dance.entity.enums.TipoDocumento;
 import lombok.*;
 
 @Getter
@@ -15,6 +16,7 @@ public class PerfilResponse {
     private Long id;
     private Long usuarioId;
     private String dni;          // ← enmascarado (****1234)
+    private TipoDocumento tipoDocumento;
     private Integer anioNacimiento;
     private Rol rol;
 
@@ -23,6 +25,7 @@ public class PerfilResponse {
     private String email;
     private String telefono;
     private String ciudad;
+    private String nacionalidad;
     private String genero;
     private String categoria;
     private String academiaActual;
@@ -40,6 +43,7 @@ public class PerfilResponse {
                 .id(p != null ? p.getId() : null)
                 .usuarioId(u.getId())
                 .dni(dniMask)
+                .tipoDocumento(u.getTipoDocumento())
                 .anioNacimiento(u.getAnioNacimiento())
                 .rol(u.getRol())
                 .nombre(p != null ? p.getNombre() : null)
@@ -47,6 +51,7 @@ public class PerfilResponse {
                 .email(p != null ? p.getEmail() : null)
                 .telefono(p != null ? p.getTelefono() : null)
                 .ciudad(p != null ? p.getCiudad() : null)
+                .nacionalidad(p != null ? p.getNacionalidad() : null)
                 .genero(p != null ? p.getGenero() : null)
                 .categoria(p != null ? p.getCategoria() : null)
                 .academiaActual(p != null ? p.getAcademiaActual() : null)

@@ -30,6 +30,9 @@ public class PerfilRequest {
     @Size(max = 100, message = "Ciudad demasiado larga")
     private String ciudad;
 
+    @Size(max = 100, message = "Nacionalidad demasiado larga")
+    private String nacionalidad;
+
     @Size(max = 20, message = "Género inválido")
     private String genero;
 

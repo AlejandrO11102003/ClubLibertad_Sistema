@@ -40,6 +40,7 @@ public class PerfilServiceImpl implements PerfilService {
         perfil.setEmail(req.getEmail());
         perfil.setTelefono(req.getTelefono());
         perfil.setCiudad(req.getCiudad());
+        perfil.setNacionalidad(req.getNacionalidad());
         perfil.setGenero(req.getGenero());
         perfil.setCategoria(req.getCategoria());
         perfil.setAcademiaActual(req.getAcademiaActual());

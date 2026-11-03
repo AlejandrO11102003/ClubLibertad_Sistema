@@ -23,6 +23,16 @@ const CATEGORIAS = [
   "Oro (65 años a más)",
 ];
 
+const CODIGOS_PAISES = [
+  "AF","AL","DE","AD","AO","AG","SA","DZ","AR","AM","AU","AT","AZ","BS","BH","BD","BB","BE","BZ","BJ","BY","MM","BO","BA","BW","BR","BN","BG","BF","BI","BT","CV","KH","CM","CA","QA","TD","CL","CN","CY","CO","KM","CG","CD","KP","KR","CI","CR","HR","CU","DK","DM","EC","EG","SV","AE","ER","SK","SI","ES","US","EE","SZ","ET","FJ","PH","FI","FR","GA","GM","GE","GH","GD","GR","GT","GN","GW","GQ","GY","HT","HN","HU","IN","ID","IQ","IE","IS","IL","IT","JM","JP","JO","KZ","KE","KG","KI","KW","LA","LS","LV","LB","LR","LY","LI","LT","LU","MK","MG","MY","MW","MV","ML","MT","MA","MU","MR","MX","FM","MD","MC","MN","ME","MZ","NA","NR","NP","NI","NE","NG","NO","NZ","OM","NL","PK","PW","PA","PG","PY","PE","PL","PT","GB","CF","CZ","DO","RO","RW","RU","WS","SM","ST","SN","RS","SC","SL","SG","SY","SO","LK","ZA","SD","SS","SE","CH","SR","TH","TW","TJ","TZ","TL","TG","TO","TT","TN","TM","TR","TV","UA","UG","UY","UZ","VU","VA","VE","VN","YE","DJ","ZM","ZW",
+] as const;
+
+const NOMBRES_PAISES = new Intl.DisplayNames(["es-PE"], { type: "region" });
+const PAISES = CODIGOS_PAISES
+  .map((codigo) => NOMBRES_PAISES.of(codigo))
+  .filter((nombre): nombre is string => Boolean(nombre))
+  .sort((a, b) => a.localeCompare(b, "es"));
+
 const inputBase =
   "w-full rounded-btn border-[1.5px] bg-cream py-[11px] px-3.5 text-sm text-ink outline-none transition placeholder:text-[#A8A199] focus:bg-white focus:shadow-[0_0_0_3px_rgba(155,27,48,0.10)]";
 
@@ -33,6 +43,7 @@ function aFormulario(p: PerfilData): PerfilRequest {
     email: p.email || "",
     telefono: p.telefono || "",
     ciudad: p.ciudad || "",
+    nacionalidad: p.nacionalidad || (p.tipoDocumento === "DNI" ? "Perú" : ""),
     genero: p.genero || "",
     categoria: p.categoria || "",
     academiaActual: p.academiaActual || "",
@@ -52,6 +63,8 @@ export default function PerfilPage() {
   const [guardando, setGuardando] = useState(false);
   const [alerta, setAlerta] = useState<Alerta>(null);
   const [errores, setErrores] = useState<Record<string, string>>({});
+  const [busquedaPais, setBusquedaPais] = useState("");
+  const [paisAbierto, setPaisAbierto] = useState(false);
 
   useEffect(() => {
     let activo = true;
@@ -105,6 +118,12 @@ export default function PerfilPage() {
     setAlerta(null);
   };
 
+  const paisesFiltrados = busquedaPais
+    ? PAISES.filter((pais) =>
+        pais.toLocaleLowerCase("es").includes(busquedaPais.toLocaleLowerCase("es"))
+      )
+    : PAISES;
+
   const validar = () => {
     const err: Record<string, string> = {};
 
@@ -146,6 +165,7 @@ export default function PerfilPage() {
         email: form.email?.trim(),
         telefono: form.telefono?.trim(),
         ciudad: form.ciudad?.trim(),
+        nacionalidad: form.nacionalidad?.trim(),
         academiaActual: form.academiaActual?.trim(),
         marineraFavorita: form.marineraFavorita?.trim(),
         biografia: form.biografia?.trim(),
@@ -365,6 +385,62 @@ export default function PerfilPage() {
                       onChange={handleChange}
                       className={`${inputBase} border-line focus:border-primary`}
                     />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-[13px] font-medium text-ink">Nacionalidad</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        role="combobox"
+                        aria-expanded={paisAbierto}
+                        aria-controls="lista-paises"
+                        value={paisAbierto ? busquedaPais : (form.nacionalidad || "")}
+                        onFocus={() => {
+                          setBusquedaPais("");
+                          setPaisAbierto(true);
+                        }}
+                        onChange={(e) => {
+                          setBusquedaPais(e.target.value);
+                          setPaisAbierto(true);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") setPaisAbierto(false);
+                        }}
+                        className={`${inputBase} rounded-none border-line focus:border-primary`}
+                        placeholder="Buscar nacionalidad..."
+                        autoComplete="off"
+                      />
+                      {paisAbierto && (
+                        <div
+                          id="lista-paises"
+                          role="listbox"
+                          className="absolute z-20 mt-1 max-h-52 w-full overflow-y-auto rounded-none border border-line bg-white py-1 shadow-lg"
+                        >
+                          {paisesFiltrados.length > 0 ? (
+                            paisesFiltrados.map((pais) => (
+                              <button
+                                key={pais}
+                                type="button"
+                                role="option"
+                                aria-selected={form.nacionalidad === pais}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                  setForm((prev) => ({ ...prev, nacionalidad: pais }));
+                                  setBusquedaPais(pais);
+                                  setPaisAbierto(false);
+                                }}
+                                className="block w-full px-3 py-2 text-left text-sm text-ink hover:bg-cream"
+                              >
+                                {pais}
+                              </button>
+                            ))
+                          ) : (
+                            <p className="px-3 py-2 text-sm text-ink-muted">No se encontraron países.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>

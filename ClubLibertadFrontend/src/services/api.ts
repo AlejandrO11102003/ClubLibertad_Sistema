@@ -29,6 +29,7 @@ export interface RegistroBailarinRequest {
   email?: string;
   telefono?: string;
   ciudad?: string;
+  nacionalidad?: string;
   genero?: string;
   categoria?: string;
   academiaActual?: string;
@@ -46,6 +47,7 @@ export interface Perfil {
   email?: string;
   telefono?: string;
   ciudad?: string;
+  nacionalidad?: string;
   genero?: string;
   categoria?: string;
   academiaActual?: string;
