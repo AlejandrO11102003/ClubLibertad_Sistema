@@ -18,5 +18,5 @@ public interface ResultadoService {
 
     List<ResultadoResponse> listarMios(String dni);
 
-    byte[] generarPlantilla();
+    byte[] generarPlantilla(String dniAdmin, Long concursoId);
 }

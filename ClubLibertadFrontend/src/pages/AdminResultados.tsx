@@ -99,7 +99,11 @@ export default function AdminResultados() {
     setAlerta(null);
 
     try {
-      await adminResultadosService.descargarPlantilla();
+      if (!concursoId) {
+        setAlerta({ tipo: "error", texto: "Selecciona un concurso." });
+        return;
+      }
+      await adminResultadosService.descargarPlantilla(concursoId);
     } catch (err: any) {
       setAlerta({
         tipo: "error",
@@ -232,7 +236,7 @@ export default function AdminResultados() {
                 <button
                   type="button"
                   onClick={descargarPlantilla}
-                  disabled={descargando}
+                  disabled={descargando || !concursoId}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-btn border border-line px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:border-primary hover:text-primary disabled:opacity-60"
                 >
                   <Download size={16} />
@@ -258,7 +262,8 @@ export default function AdminResultados() {
               <p className="mb-1 font-semibold text-ink">Columnas obligatorias</p>
               <p>
                 <code>categoria</code>, <code>dni_solicitante</code>,{" "}
-                <code>dni_pareja</code>, <code>posicion</code>. La columna{" "}
+                <code>dni_pareja</code>, <code>etapa</code>. La columna{" "}
+                <code>posicion</code> puede quedar vacía para parejas sin posición. La columna{" "}
                 <code>puntaje</code> es opcional.
               </p>
               <p className="mt-2">
@@ -336,6 +341,7 @@ export default function AdminResultados() {
                   <tr>
                     <th className="px-4 py-3">Categoría</th>
                     <th className="px-4 py-3">Pareja</th>
+                    <th className="px-4 py-3">Etapa</th>
                     <th className="px-4 py-3">Posición</th>
                     <th className="px-4 py-3">Puntaje</th>
                     <th className="px-4 py-3">Estado</th>
@@ -350,8 +356,11 @@ export default function AdminResultados() {
                       <td className="px-4 py-3 text-ink-muted">
                         {resultado.solicitanteNombre} y {resultado.parejaNombre}
                       </td>
+                      <td className="px-4 py-3 text-ink-muted">
+                        {resultado.etapa}
+                      </td>
                       <td className="px-4 py-3 font-semibold text-ink">
-                        {resultado.posicion}°
+                        {resultado.posicion != null ? `${resultado.posicion}°` : "—"}
                       </td>
                       <td className="px-4 py-3 text-ink-muted">
                         {resultado.puntaje != null ? Number(resultado.puntaje).toFixed(2) : "—"}

@@ -245,7 +245,8 @@ export interface Resultado {
   solicitanteNombre: string;
   parejaId: number;
   parejaNombre: string;
-  posicion: number;
+  posicion?: number;
+  etapa: "ELIMINATORIA" | "SEMIFINAL" | "FINAL";
   puntaje?: number;
   publicado: boolean;
 }
@@ -963,11 +964,11 @@ export const adminResultadosService = {
     );
   },
 
-  async descargarPlantilla(): Promise<void> {
+  async descargarPlantilla(concursoId: number | string): Promise<void> {
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    const response = await fetch(`${API_URL}/admin/resultados/plantilla`, {
+    const response = await fetch(`${API_URL}/admin/resultados/plantilla?concursoId=${concursoId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 

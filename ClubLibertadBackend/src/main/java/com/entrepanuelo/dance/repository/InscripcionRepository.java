@@ -16,6 +16,20 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
 
     @Query("""
             select i from Inscripcion i
+            join fetch i.categoria
+            join fetch i.solicitante s
+            join fetch i.pareja p
+            where i.concurso.id = :concursoId
+              and i.estado = :estado
+            order by i.categoria.nombre asc, i.id asc
+            """)
+    List<Inscripcion> listarPorConcursoYEstado(
+            @Param("concursoId") Long concursoId,
+            @Param("estado") EstadoInscripcion estado
+    );
+
+    @Query("""
+            select i from Inscripcion i
             where i.solicitante.id = :usuarioId or i.pareja.id = :usuarioId
             order by i.fechaSolicitud desc
             """)

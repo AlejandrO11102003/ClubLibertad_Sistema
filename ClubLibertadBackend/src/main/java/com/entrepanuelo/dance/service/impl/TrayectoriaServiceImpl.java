@@ -114,7 +114,9 @@ public class TrayectoriaServiceImpl implements TrayectoriaService {
         List<Resultado> resultados =
                 resultadoRepository.listarPublicadosPorUsuario(usuario.getId());
 
-        int total = resultados.size();
+        int total = (int) resultados.stream()
+                .filter(resultado -> resultado.getPosicion() != null)
+                .count();
         int totalConcursos = (int) resultados.stream()
                 .map(r -> r.getConcurso().getId())
                 .distinct()
@@ -127,7 +129,11 @@ public class TrayectoriaServiceImpl implements TrayectoriaService {
         Integer mejorPosicion = null;
 
         for (Resultado resultado : resultados) {
-            int posicion = resultado.getPosicion();
+            Integer posicion = resultado.getPosicion();
+            if (posicion == null) {
+                continue;
+            }
+
             sumaPosiciones += posicion;
             mejorPosicion = mejorPosicion == null
                     ? posicion

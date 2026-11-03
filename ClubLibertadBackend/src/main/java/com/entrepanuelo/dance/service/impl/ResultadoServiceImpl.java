@@ -11,6 +11,7 @@ import com.entrepanuelo.dance.entity.Usuario;
 import com.entrepanuelo.dance.entity.enums.EstadoConcurso;
 import com.entrepanuelo.dance.entity.enums.EstadoImportacion;
 import com.entrepanuelo.dance.entity.enums.EstadoInscripcion;
+import com.entrepanuelo.dance.entity.enums.EtapaResultado;
 import com.entrepanuelo.dance.entity.enums.Rol;
 import com.entrepanuelo.dance.exception.BusinessException;
 import com.entrepanuelo.dance.exception.ForbiddenException;
@@ -50,7 +51,7 @@ import java.util.Set;
 public class ResultadoServiceImpl implements ResultadoService {
 
     private static final List<String> COLUMNAS_OBLIGATORIAS = List.of(
-            "categoria", "dni_solicitante", "dni_pareja", "posicion");
+            "categoria", "dni_solicitante", "dni_pareja", "etapa");
 
     private final ResultadoRepository resultadoRepository;
     private final ImportacionRepository importacionRepository;
@@ -143,11 +144,12 @@ public class ResultadoServiceImpl implements ResultadoService {
             String categoriaNombre = valor(row, columnas.get("categoria"), formatter);
             String dniSolicitante = soloDigitos(valor(row, columnas.get("dni_solicitante"), formatter));
             String dniPareja = soloDigitos(valor(row, columnas.get("dni_pareja"), formatter));
+            String etapaTexto = valor(row, columnas.get("etapa"), formatter);
             String posicionTexto = valor(row, columnas.get("posicion"), formatter);
             String puntajeTexto = valor(row, columnas.get("puntaje"), formatter);
 
             if (categoriaNombre.isBlank() && dniSolicitante.isBlank()
-                    && dniPareja.isBlank() && posicionTexto.isBlank()) {
+                    && dniPareja.isBlank() && etapaTexto.isBlank() && posicionTexto.isBlank()) {
                 continue;
             }
 
@@ -170,6 +172,7 @@ public class ResultadoServiceImpl implements ResultadoService {
                 erroresFila.add("los DNI de la pareja no pueden ser iguales");
             }
 
+            EtapaResultado etapa = parseEtapa(etapaTexto, erroresFila);
             Integer posicion = parsePosicion(posicionTexto, erroresFila);
             BigDecimal puntaje = parsePuntaje(puntajeTexto, erroresFila);
 
@@ -220,6 +223,7 @@ public class ResultadoServiceImpl implements ResultadoService {
             resultado.setConcurso(concurso);
             resultado.setCategoria(asignacion.getCategoria());
             resultado.setInscripcion(inscripcion);
+            resultado.setEtapa(etapa);
             resultado.setPosicion(posicion);
             resultado.setPuntaje(puntaje);
             resultado.setPublicado(true);
@@ -305,31 +309,58 @@ public class ResultadoServiceImpl implements ResultadoService {
     }
 
     @Override
-    public byte[] generarPlantilla() {
+    @Transactional(readOnly = true)
+    public byte[] generarPlantilla(String dniAdmin, Long concursoId) {
+        buscarAdmin(dniAdmin);
+
+        Concurso concurso = concursoRepository.findById(concursoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Concurso no encontrado"));
+
+        List<Inscripcion> inscripciones = inscripcionRepository.listarPorConcursoYEstado(
+                concurso.getId(), EstadoInscripcion.CONFIRMADA);
+
         try (XSSFWorkbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Resultados");
             Row header = sheet.createRow(0);
 
-            String[] columnas = {"categoria", "dni_solicitante", "dni_pareja", "posicion", "puntaje"};
+            String[] columnas = {
+                    "categoria", "dni_solicitante", "nombre_solicitante",
+                    "dni_pareja", "nombre_pareja", "etapa", "posicion", "puntaje"
+            };
             for (int i = 0; i < columnas.length; i++) {
                 header.createCell(i).setCellValue(columnas[i]);
                 sheet.setColumnWidth(i, 20 * 256);
             }
 
-            Row ejemplo = sheet.createRow(1);
-            ejemplo.createCell(0).setCellValue("Adultos");
-            ejemplo.createCell(1).setCellValue("12345678");
-            ejemplo.createCell(2).setCellValue("87654321");
-            ejemplo.createCell(3).setCellValue(1);
-            ejemplo.createCell(4).setCellValue(95.5);
+            for (int i = 0; i < inscripciones.size(); i++) {
+                Inscripcion inscripcion = inscripciones.get(i);
+                Row row = sheet.createRow(i + 1);
+                row.createCell(0).setCellValue(inscripcion.getCategoria().getNombre());
+                row.createCell(1).setCellValue(inscripcion.getSolicitante().getDni());
+                row.createCell(2).setCellValue(nombreCompleto(inscripcion.getSolicitante()));
+                row.createCell(3).setCellValue(inscripcion.getPareja().getDni());
+                row.createCell(4).setCellValue(nombreCompleto(inscripcion.getPareja()));
+            }
 
             workbook.write(output);
             return output.toByteArray();
         } catch (Exception e) {
             throw new BusinessException("No se pudo generar la plantilla Excel");
         }
+    }
+
+    private String nombreCompleto(Usuario usuario) {
+        if (usuario.getPerfil() == null) {
+            return "Bailarín";
+        }
+
+        String nombre = usuario.getPerfil().getNombre() != null
+                ? usuario.getPerfil().getNombre() : "";
+        String apellido = usuario.getPerfil().getApellido() != null
+                ? usuario.getPerfil().getApellido() : "";
+        return (nombre + " " + apellido).trim();
     }
 
     private Usuario buscarAdmin(String dni) {
@@ -361,8 +392,21 @@ public class ResultadoServiceImpl implements ResultadoService {
 
     private Integer parsePosicion(String valor, List<String> errores) {
         if (valor == null || valor.isBlank()) {
-            errores.add("la posición es obligatoria");
             return null;
+        }
+
+        private EtapaResultado parseEtapa(String valor, List<String> errores) {
+            if (valor == null || valor.isBlank()) {
+                errores.add("la etapa es obligatoria");
+                return null;
+            }
+
+            try {
+                return EtapaResultado.valueOf(normalizar(valor).toUpperCase());
+            } catch (IllegalArgumentException e) {
+                errores.add("la etapa debe ser ELIMINATORIA, SEMIFINAL o FINAL");
+                return null;
+            }
         }
 
         try {

@@ -18,14 +18,14 @@ const formatearFecha = (fecha?: string) => {
   });
 };
 
-const medalla = (posicion: number) => {
+const medalla = (posicion?: number) => {
   if (posicion === 1) return "🥇";
   if (posicion === 2) return "🥈";
   if (posicion === 3) return "🥉";
   return null;
 };
 
-const estiloPosicion = (posicion: number) => {
+const estiloPosicion = (posicion?: number) => {
   if (posicion === 1) return "bg-[#FFF7DB] border-[#E5C158]";
   if (posicion === 2) return "bg-[#F3F4F6] border-[#C4C9D2]";
   if (posicion === 3) return "bg-[#FBEFE4] border-[#D8A47F]";
@@ -276,7 +276,10 @@ export default function Resultados() {
                           )}`}
                         >
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/70 text-lg font-bold text-ink">
-                            {medalla(resultado.posicion) || `${resultado.posicion}°`}
+                            {medalla(resultado.posicion) ||
+                              (resultado.posicion != null
+                                ? `${resultado.posicion}°`
+                                : "Sin posición")}
                           </div>
 
                           <div className="min-w-0 flex-1">
@@ -296,7 +299,10 @@ export default function Resultados() {
                               </Link>
                             </p>
                             <p className="text-[11px] text-ink-muted">
-                              Posición {resultado.posicion}
+                              {resultado.posicion != null
+                                ? `Posición ${resultado.posicion}`
+                                : "Sin posición"}
+                              {resultado.etapa ? ` · ${resultado.etapa}` : ""}
                               {resultado.puntaje != null
                                 ? ` · ${Number(resultado.puntaje).toFixed(2)} puntos`
                                 : ""}
@@ -364,7 +370,10 @@ export default function Resultados() {
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-primary">
-                              {medalla(resultado.posicion) || `${resultado.posicion}°`}
+                              {medalla(resultado.posicion) ||
+                                (resultado.posicion != null
+                                  ? `${resultado.posicion}°`
+                                  : "Sin posición")}
                             </p>
                             <p className="text-[11px] text-ink-muted">
                               {resultado.puntaje != null

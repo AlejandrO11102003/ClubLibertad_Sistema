@@ -1,5 +1,6 @@
 package com.entrepanuelo.dance.entity;
 
+import com.entrepanuelo.dance.entity.enums.EtapaResultado;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -40,8 +41,12 @@ public class Resultado {
     @JoinColumn(name = "id_inscripcion", nullable = false)
     private Inscripcion inscripcion;
 
-    @Column(name = "posicion", nullable = false)
+    @Column(name = "posicion")
     private Integer posicion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "etapa", nullable = false, length = 20)
+    private EtapaResultado etapa;
 
     @Column(name = "puntaje", precision = 10, scale = 2)
     private BigDecimal puntaje;

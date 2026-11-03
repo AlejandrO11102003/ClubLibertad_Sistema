@@ -2,6 +2,7 @@ package com.entrepanuelo.dance.dto.resultado;
 
 import com.entrepanuelo.dance.entity.Resultado;
 import com.entrepanuelo.dance.entity.Usuario;
+import com.entrepanuelo.dance.entity.enums.EtapaResultado;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -27,6 +28,7 @@ public class ResultadoResponse {
     private Long parejaId;
     private String parejaNombre;
     private Integer posicion;
+    private EtapaResultado etapa;
     private BigDecimal puntaje;
     private Boolean publicado;
 
@@ -45,6 +47,7 @@ public class ResultadoResponse {
                 .parejaId(r.getInscripcion().getPareja().getId())
                 .parejaNombre(nombreCompleto(r.getInscripcion().getPareja()))
                 .posicion(r.getPosicion())
+                .etapa(r.getEtapa())
                 .puntaje(r.getPuntaje())
                 .publicado(r.getPublicado())
                 .build();

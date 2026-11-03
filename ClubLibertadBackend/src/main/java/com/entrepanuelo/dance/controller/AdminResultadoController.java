@@ -64,8 +64,11 @@ public class AdminResultadoController {
 
     @GetMapping("/plantilla")
     @Operation(summary = "Descargar la plantilla Excel de resultados")
-    public ResponseEntity<byte[]> plantilla() {
-        byte[] archivo = resultadoService.generarPlantilla();
+    public ResponseEntity<byte[]> plantilla(
+            @RequestParam Long concursoId,
+            Authentication authentication) {
+        byte[] archivo = resultadoService.generarPlantilla(
+                authentication.getName(), concursoId);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
