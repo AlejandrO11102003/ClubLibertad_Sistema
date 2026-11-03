@@ -74,7 +74,7 @@ export default function MiPareja() {
             to="/"
             className="inline-flex items-center gap-2 font-display text-lg font-bold text-primary no-underline"
           >
-            <ArrowLeft size={18} /> ENTRE PAÑUELOS
+            <ArrowLeft size={18} /> ENTRE PAÑUELOS 
           </Link>
 
           <nav className="flex items-center gap-3 text-[13px]">
