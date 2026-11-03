@@ -11,4 +11,6 @@ public interface AdminInscripcionService {
                                      EstadoInscripcion estado, String texto);
 
     InscripcionResponse obtener(Long id);
+
+    byte[] exportar(Long concursoId);
 }

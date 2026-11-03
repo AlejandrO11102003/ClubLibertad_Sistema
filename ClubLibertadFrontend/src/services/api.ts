@@ -894,6 +894,27 @@ export const adminInscripcionesService = {
   async obtener(id: number | string): Promise<Inscripcion> {
     return apiFetchData<Inscripcion>(`/admin/inscripciones/${id}`);
   },
+
+  async exportar(concursoId: number | string): Promise<void> {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const response = await fetch(`${API_URL}/admin/inscripciones/${concursoId}/exportar`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+
+    if (!response.ok) {
+      throw new ApiError("No se pudo exportar las inscripciones", response.status);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = `inscripciones-concurso-${concursoId}.xlsx`;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+  },
 };
 
 

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,5 +45,16 @@ public class AdminInscripcionController {
         return ResponseEntity.ok(ApiResponse.ok(
                 "Inscripción obtenida correctamente",
                 adminInscripcionService.obtener(id)));
+    }
+
+    @GetMapping("/{concursoId}/exportar")
+    @Operation(summary = "Exportar inscripciones de un concurso a Excel")
+    public ResponseEntity<byte[]> exportar(@PathVariable Long concursoId) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"inscripciones-concurso-" + concursoId + ".xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(adminInscripcionService.exportar(concursoId));
     }
 }

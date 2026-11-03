@@ -73,6 +73,7 @@ export default function AdminInscripciones() {
   const [filtroEstado, setFiltroEstado] = useState("");
   const [texto, setTexto] = useState("");
   const [detalle, setDetalle] = useState<Inscripcion | null>(null);
+  const [exportando, setExportando] = useState(false);
 
   useEffect(() => {
     let activo = true;
@@ -139,6 +140,22 @@ export default function AdminInscripciones() {
     setFiltroCategoria("");
     setFiltroEstado("");
     setTexto("");
+  };
+
+  const exportarConcurso = async () => {
+    if (!filtroConcurso) {
+      setError("Selecciona un concurso para exportar sus inscripciones.");
+      return;
+    }
+    setExportando(true);
+    setError(null);
+    try {
+      await adminInscripcionesService.exportar(filtroConcurso);
+    } catch (err: any) {
+      setError(err?.message || "No se pudo exportar el archivo.");
+    } finally {
+      setExportando(false);
+    }
   };
 
   const tarjetas = [
@@ -293,12 +310,21 @@ export default function AdminInscripciones() {
           <p className="text-[11px] text-ink-muted">
             {filtradas.length} de {inscripciones.length} inscripciones
           </p>
-          <button
-            onClick={limpiarFiltros}
-            className="text-[11px] font-semibold text-primary hover:underline"
-          >
-            Limpiar filtros
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={limpiarFiltros}
+              className="text-[11px] font-semibold text-primary hover:underline"
+            >
+              Limpiar filtros
+            </button>
+            <button
+              onClick={exportarConcurso}
+              disabled={exportando || !filtroConcurso}
+              className="rounded-btn bg-primary px-3 py-2 text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {exportando ? "Exportando…" : "Exportar Excel"}
+            </button>
+          </div>
         </div>
       </section>
 
